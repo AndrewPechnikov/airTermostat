@@ -1,32 +1,37 @@
-
-// Receiver.ino
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 #include "RelayManager.h"
-#include "RFCommon.h"
+#include "Transfer.h"
 
-#define CE_PIN 9
-#define CSN_PIN 10
+// Конфігурація пінів
+const int PIN_RELAY_ON = 5;
+const int PIN_RELAY_OFF = 6;
+const int PIN_STATE_RELAY = 7;
+const int TIME_FOR_OPERATION_RELAY = 50;
 
-RF24 radio(CE_PIN, CSN_PIN);
-RelayManager relay(7);
-bool relayState = false;
+const int CE_PIN = 9;
+const int CS_PIN = 10;
+
+RelayManager relay(PIN_RELAY_ON, PIN_RELAY_OFF, PIN_STATE_RELAY, TIME_FOR_OPERATION_RELAY);
+Transfer radio(CE_PIN, CS_PIN);
+
+bool relayState;
 
 void setup() {
-    Serial.begin(BAUD_RATE);
-    radio.begin();
-    radio.openReadingPipe(0, RF_ADDRESS);
-    radio.setPALevel(RF24_PA_LOW);
-    radio.startListening();
+    Serial.begin(9600);
     relay.begin();
+    radio.begin();
     Serial.println("Receiver ready");
 }
 
 void loop() {
-    if (radio.available()) {
-        radio.read(&relayState, sizeof(relayState));
-        relay.setState(relayState);
+    relayState = radio.getStateRelay();  // Отримати стан від передавача
+    
+    if (relay.isRelayIsEnable() != relayState) {
+        relay.setState(relayState);      // Синхронізувати стан реле
     }
+    
+    radio.returnRelayState(relay.isRelayIsEnable());  // Відправити актуальний стан
     delay(100);
 }
