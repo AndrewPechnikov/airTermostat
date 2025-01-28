@@ -1,0 +1,42 @@
+# Finalized Instructions for setting up the project with DS18B20
+
+1. Connect DS18B20 temperature sensor:
+   - VCC -> 3.3V or 5V
+   - GND -> GND
+   - DQ -> D2
+   - Add a 4.7 kOhm pull-up resistor between DQ and VCC.
+
+2. Connect NRF24L01 modules:
+
+   For the **Transmitter**:
+   - VCC -> 3.3V (not 5V!)
+   - GND -> GND
+   - CE -> D9
+   - CSN -> D10
+   - SCK -> D13
+   - MOSI -> D11
+   - MISO -> D12
+
+   For the **Receiver**:
+   - VCC -> 3.3V (not 5V!)
+   - GND -> GND
+   - CE -> D7
+   - CSN -> D8
+   - SCK -> D13
+   - MOSI -> D11
+   - MISO -> D12
+
+3. For the Transmitter:
+   - Connect the LCD display to pins (2, 3, 4, 5, 6, 8).
+
+4. For the Receiver:
+   - Connect the relay module to pin D4.
+
+5. Install the required libraries in Arduino IDE:
+   - `OneWire` and `DallasTemperature` for DS18B20.
+   - `RF24` for NRF24L01.
+
+6. Upload "Transmitter.ino" to the Arduino controlling the temperature sensor and display.
+7. Upload "Receiver.ino" to the Arduino controlling the relay.
+
+8. Power the modules and ensure both Arduinos are within range of the NRF24L01 modules.
