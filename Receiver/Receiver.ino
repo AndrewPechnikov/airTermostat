@@ -3,6 +3,8 @@
 #include <RF24.h>
 #include "RelayManager.h"
 #include "Transfer.h"
+#include "DataBuffer.h"
+#include "NotificationManager.h"
 
 // Конфігурація пінів
 const int PIN_RELAY_ON = 5;
@@ -16,6 +18,9 @@ const int CS_PIN = 10;
 RelayManager relay(PIN_RELAY_ON, PIN_RELAY_OFF, PIN_STATE_RELAY, TIME_FOR_OPERATION_RELAY);
 Transfer radio(CE_PIN, CS_PIN);
 
+DataBuffer dataBuffer;
+NotificationManager notificationManager;
+
 bool relayState;
 
 void setup() {
@@ -26,12 +31,14 @@ void setup() {
 }
 
 void loop() {
-    relayState = radio.getStateRelay();  // Отримати стан від передавача
-    
-    if (relay.isRelayIsEnable() != relayState) {
-        relay.setState(relayState);      // Синхронізувати стан реле
+    if (radio.dataAvailable()) {
+        Data data = radio.getData();
+        dataBuffer.addData(data.currentTemp);
+        
+        // Перевірка середньої температури за останню годину
+        float avgTemp = dataBuffer.getAverageTemp(3600000);
+        if (abs(avgTemp - data.targetTemp) > MAX_TEMP_DIFFERENCE) {
+            notificationManager.notify(TEMP_TOO_HIGH);
+        }
     }
-    
-    radio.returnRelayState(relay.isRelayIsEnable());  // Відправити актуальний стан
-    delay(100);
 }
