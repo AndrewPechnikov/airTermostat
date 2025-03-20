@@ -10,6 +10,8 @@ public:
     void enterSleepMode();
     void wakeUp();
     void enterLightSleep();
+    bool testSleepMode();
+    float getCurrentConsumption();
 private:
     static void watchdogSetup();
 };

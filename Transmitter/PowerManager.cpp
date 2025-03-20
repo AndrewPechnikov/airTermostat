@@ -34,4 +34,17 @@ void PowerManager::watchdogSetup() {
     WDTCSR = 1<<WDP1 | 1<<WDP2; // 1 секунда
     WDTCSR |= _BV(WDIE);
     sei();
+}
+
+bool PowerManager::testSleepMode() {
+    // Спрощена перевірка режимів сну
+    enterLightSleep();
+    bool lightSleepOk = (SMCR & (1 << SE));
+    wakeUp();
+    return lightSleepOk;
+}
+
+float PowerManager::getCurrentConsumption() {
+    // Спрощена версія
+    return isLowPowerMode ? 0.5 : 20.0;
 } 

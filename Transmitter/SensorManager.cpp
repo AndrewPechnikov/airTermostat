@@ -34,3 +34,20 @@ float SensorManager::getTemperature() {
 bool SensorManager::isDataValid() {
     return !isnan(temperature);
 }
+
+bool SensorManager::testSensor() {
+    float temp = getCurrentTemperature();
+    if (isnan(temp)) {
+        return false;
+    }
+    
+    if (temp < -40 || temp > 80) {
+        return false;
+    }
+    
+    return true;
+}
+
+float SensorManager::getLastReading() {
+    return lastTemp;
+}

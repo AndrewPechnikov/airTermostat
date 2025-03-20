@@ -58,3 +58,23 @@ bool Transfer::sendData(float currentTemp, float targetTemp) {
     
     return success;
 }
+
+bool Transfer::testConnection() {
+    if (!radio.begin()) {
+        return false;
+    }
+    
+    // Тест базових налаштувань
+    radio.setChannel(76);
+    if (radio.getChannel() != 76) {
+        return false;
+    }
+    
+    // Тест потужності
+    radio.setPALevel(RF24_PA_MAX);
+    if (radio.getPALevel() != RF24_PA_MAX) {
+        return false;
+    }
+    
+    return true;
+}

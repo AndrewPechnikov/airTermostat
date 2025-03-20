@@ -146,4 +146,36 @@ MIT License
 - v1.3.0 - Покращено стабільність зв'язку
 
 ## Контакти
-[Ваші контактні дані] 
+[Ваші контактні дані]
+
+## Підготовка до тестування
+1. Перевірте наявність всіх компонентів
+2. Встановіть останні версії бібліотек
+3. Перевірте підключення обладнання
+
+## Оновлення тестів
+1. При додаванні нових функцій додавайте відповідні тести
+2. Оновлюйте run_tests.sh
+3. Документуйте зміни в README.md
+
+#!/bin/bash
+
+# Додати перевірку наявності всіх необхідних компонентів
+check_requirements() {
+    command -v arduino-cli >/dev/null 2>&1 || { echo "arduino-cli not found"; exit 1; }
+}
+
+# Додати функцію очищення
+cleanup() {
+    echo "Cleaning up..."
+    # Очищення тимчасових файлів
+}
+
+# Додати trap для cleanup
+trap cleanup EXIT
+
+# Створити папки якщо їх немає
+mkdir -p tests/hardware/RadioTest
+mkdir -p tests/hardware/SensorTest
+mkdir -p tests/functional/PowerTest
+mkdir -p tests/integration/SystemTest 

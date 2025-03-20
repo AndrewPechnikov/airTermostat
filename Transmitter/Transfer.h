@@ -9,6 +9,7 @@ public:
     Transfer(uint8_t ce_pin = 9, uint8_t csn_pin = 10, uint8_t irq_pin = 2);
     void begin();
     bool sendData(float currentTemp, float targetTemp);
+    bool testConnection();
     static void handleIRQ();
     
 private:
