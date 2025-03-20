@@ -1,34 +1,21 @@
-#ifndef TRANSFER
-#define TRANSFER
+#ifndef TRANSFER_H
+#define TRANSFER_H
 
-#include <SPI.h>
-#include "nRF24L01.h"
-#include "RF24.h"
-
-
+#include <RF24.h>
+#include "RFCommon.h"
 
 class Transfer {
-private:
-RF24 radio;
-
-#define SIG_POWER RF24_PA_LOW
-#define CH_NUM 0x60 
-#define SIG_SPEED RF24_1MBPS
-
-
-bool transmit_data = true;    
-bool telemetry;         
-byte rssi;
-int trnsmtd_pack = 1, failed_pack;
-unsigned long RSSI_timer;
-
-
-
 public:
-    Transfer();  // Конструктор
-    void begin();            // Ініціалізація піну
-    bool isRemoteSwitchEnable(); // Запит на оновлення температури
-    void send(bool data);
+    Transfer(uint8_t ce_pin = 9, uint8_t csn_pin = 10, uint8_t irq_pin = 2);
+    void begin();
+    bool sendData(float currentTemp, float targetTemp);
+    static void handleIRQ();
+    
+private:
+    RF24 radio;
+    uint8_t irq_pin;
+    volatile static bool txComplete;
+    void setupIRQ();
 };
 
 #endif

@@ -1,57 +1,60 @@
 #include "Transfer.h"
 
+volatile bool Transfer::txComplete = false;
 
-Transfer::Transfer() : radio(9, 10) {}  
+Transfer::Transfer(uint8_t ce_pin, uint8_t csn_pin, uint8_t irq_pin) 
+    : radio(ce_pin, csn_pin), irq_pin(irq_pin) {}
+
 void Transfer::begin() {
-  byte address[][6] = {"1Node", "2Node", "3Node", "4Node", "5Node", "6Node"};
-  radio.begin();                      // активировать модуль
-  radio.setAutoAck(1);                // режим подтверждения приёма, 1 вкл 0 выкл
-  radio.setRetries(0, 15);            // (время между попыткой достучаться, число попыток)
-  radio.enableAckPayload();           // разрешить отсылку данных в ответ на входящий сигнал
-  radio.setPayloadSize(32);           // размер пакета, в байтах
-  radio.openWritingPipe(address[0]);  // мы - труба 0, открываем канал для передачи данных
-  radio.setChannel(CH_NUM);           // выбираем канал (в котором нет шумов!)
-  radio.setPALevel(SIG_POWER);        // уровень мощности передатчика
-  radio.setDataRate(SIG_SPEED);       // скорость обмена
-  // должна быть одинакова на приёмнике и передатчике!
-  // при самой низкой скорости имеем самую высокую чувствительность и дальность!!
-
-  radio.powerUp();        // начать работу
-  radio.stopListening();  // не слушаем радиоэфир, мы передатчик
+    radio.begin();
+    radio.setChannel(76);
+    radio.setDataRate(RF24_250KBPS);
+    radio.setPALevel(RF24_PA_MAX);
+    radio.enableDynamicPayloads();
+    radio.setRetries(5, 15);
+    radio.openWritingPipe(RF_ADDRESS);
+    
+    // Налаштування IRQ
+    setupIRQ();
+    radio.maskIRQ(false, true, true); // маскуємо всі IRQ крім TX_DS
 }
 
+void Transfer::setupIRQ() {
+    pinMode(irq_pin, INPUT);
+    attachInterrupt(digitalPinToInterrupt(irq_pin), handleIRQ, FALLING);
+}
 
-void Transfer::send(bool data) {
-  // забиваем transmit_data данными, для примера
+void Transfer::handleIRQ() {
+    txComplete = true;
+}
 
-
-
-  // отправка пакета transmit_data
-  if (radio.write(&transmit_data, sizeof(transmit_data))) {
-    trnsmtd_pack++;
-    if (!radio.available()) {  // если получаем пустой ответ
-    } else {
-      while (radio.available()) {                   // если в ответе что-то есть
-        radio.read(&telemetry, sizeof(telemetry));  // читаем
-        // получили забитый данными массив telemetry ответа от приёмника
-      }
+bool Transfer::sendData(float currentTemp, float targetTemp) {
+    txComplete = false;
+    
+    Data data;
+    data.currentTemp = currentTemp;
+    data.targetTemp = targetTemp;
+    
+    radio.stopListening();
+    radio.write(&data, sizeof(Data));
+    
+    // Чекаємо на переривання замість активного очікування
+    unsigned long started_waiting_at = millis();
+    while (!txComplete && (millis() - started_waiting_at < 500)) {
+        // Входимо в режим сну на короткий час
+        set_sleep_mode(SLEEP_MODE_IDLE);
+        sleep_mode();
     }
-  } else {
-    failed_pack++;
-  }
-
-  if (millis() - RSSI_timer > 1000) {  // таймер RSSI
-    // расчёт качества связи (0 - 100%) на основе числа ошибок и числа успешных передач
-    rssi = (1 - ((float)failed_pack / trnsmtd_pack)) * 100;
-
-    // сбросить значения
-    failed_pack = 0;
-    trnsmtd_pack = 0;
-    RSSI_timer = millis();
-  }
-}
-
-bool Transfer::isRemoteSwitchEnable() {
-
-  return telemetry;
+    
+    bool success = txComplete;
+    
+    if (success) {
+        uint8_t pipe;
+        if (radio.available(&pipe)) {
+            AckData ackData;
+            radio.read(&ackData, sizeof(AckData));
+        }
+    }
+    
+    return success;
 }

@@ -55,11 +55,15 @@ void loop() {
             notificationManager.notify(TEMP_TOO_HIGH);
         }
         
+        // Використовуємо IRQ для передачі
         if (!postman.sendData(currentTemp, targetTemp)) {
             notificationManager.notify(CONNECTION_LOST);
         }
         
         lastUpdate = millis();
         powerManager.enterSleepMode();
+    } else {
+        // Легкий сон між оновленнями
+        powerManager.enterLightSleep();
     }
 }

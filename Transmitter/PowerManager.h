@@ -9,6 +9,7 @@ public:
     void setup();
     void enterSleepMode();
     void wakeUp();
+    void enterLightSleep();
 private:
     static void watchdogSetup();
 };
