@@ -1,50 +1,24 @@
 #include "PowerManager.h"
-#include <avr/wdt.h>
+#include "Config.h"
 
-void PowerManager::setup() {
-    watchdogSetup();
+PowerManager::PowerManager() : lastWakeTime(0) {
 }
 
-void PowerManager::enterSleepMode() {
-    // Глибокий сон
+void PowerManager::begin() {
+    lastWakeTime = millis();
+}
+
+void PowerManager::enterSleep() {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
-    power_all_disable();
-    sleep_mode();
-}
-
-void PowerManager::enterLightSleep() {
-    // Легкий сон, дозволяє працювати перериванням
-    set_sleep_mode(SLEEP_MODE_IDLE);
     sleep_enable();
     sleep_mode();
     sleep_disable();
 }
 
 void PowerManager::wakeUp() {
-    sleep_disable();
-    power_all_enable();
+    lastWakeTime = millis();
 }
 
-void PowerManager::watchdogSetup() {
-    cli();
-    wdt_reset();
-    MCUSR &= ~(1<<WDRF);
-    WDTCSR |= (1<<WDCE) | (1<<WDE);
-    WDTCSR = 1<<WDP1 | 1<<WDP2; // 1 секунда
-    WDTCSR |= _BV(WDIE);
-    sei();
-}
-
-bool PowerManager::testSleepMode() {
-    // Спрощена перевірка режимів сну
-    enterLightSleep();
-    bool lightSleepOk = (SMCR & (1 << SE));
-    wakeUp();
-    return lightSleepOk;
-}
-
-float PowerManager::getCurrentConsumption() {
-    // Спрощена версія
-    return isLowPowerMode ? 0.5 : 20.0;
+bool PowerManager::isTimeToSleep() {
+    return (millis() - lastWakeTime >= SLEEP_INTERVAL);
 } 

@@ -1,19 +1,23 @@
 #ifndef TIME_MANAGER_H
 #define TIME_MANAGER_H
 
-#include <RTClib.h>
-#include "EEPROMManager.h"
+#include <Arduino.h>
 
 class TimeManager {
 public:
-    void setup();
-    float getTargetTemperature();
-    bool isNightTime();
-    void setSchedule(uint8_t nightStart, uint8_t nightEnd);
+    TimeManager();
+    void begin();
+    unsigned long getCurrentTime();
+    unsigned long getLastCheckTime();
+    void setTargetTemperature(float temp);
+    float getTargetTemperature() const;
+
+    bool isTimeToCheck();
+    void resetCheckTimer();
+    
 private:
-    RTC_DS3231 rtc;
-    Settings settings;
-    EEPROMManager eeprom;
+    unsigned long lastCheckTime;
+    float targetTemperature;
 };
 
 #endif 

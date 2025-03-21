@@ -2,9 +2,7 @@
 
 Transfer::Transfer(uint8_t ce, uint8_t csn, uint8_t irq) : 
     radio(ce, csn), 
-    irqPin(irq),
-    pipeNo(0),
-    received_data(false)
+    irqPin(irq) 
 {
 }
 
@@ -30,16 +28,4 @@ Command Transfer::getCommand() {
     Command cmd;
     radio.read(&cmd, sizeof(Command));
     return cmd;
-}
-
-bool Transfer::getStateRelay() {
-    if (radio.available(&pipeNo)) {  // Перевірка наявності даних
-        radio.read(&received_data, sizeof(received_data));
-        return received_data;
-    }
-    return false;  // Повертаємо false, якщо даних немає
-}
-
-void Transfer::returnRelayState(bool realStateRelay) {
-    radio.writeAckPayload(pipeNo, &realStateRelay, sizeof(realStateRelay));
-}
+} 

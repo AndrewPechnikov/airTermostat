@@ -1,69 +1,160 @@
-#include "../../Transmitter/SensorManager.h"
-#include "../../Transmitter/DisplayManager.h"
-#include "../../Transmitter/Transfer.h"
-#include "../../Transmitter/PowerManager.h"
+#include <SPI.h>
+#include <DHT.h>
+#include "Config.h"
+#include "SensorConfig.h"
+#include "DisplayManager.h"
+#include "TimeManager.h"
+#include "RadioManager.h"
+#include "PowerManager.h"
 
-SensorManager sensor;
+// Ініціалізація об'єктів
+DHT dht(PIN_DHT, DHT_TYPE);
 DisplayManager display;
-Transfer transfer;
+TimeManager timeManager;
+RadioManager radio;
 PowerManager powerManager;
+
+bool testPassed = false;
+String errorMessage = "";
+unsigned long testStartTime = 0;
+unsigned long testDuration = 0;
+
+void logError(const char* message) {
+    Serial.print(F("ERROR: "));
+    Serial.println(message);
+    errorMessage = message;
+    testPassed = false;
+}
+
+void logInfo(const char* message) {
+    Serial.print(F("INFO: "));
+    Serial.println(message);
+}
+
+void logSuccess(const char* message) {
+    Serial.print(F("SUCCESS: "));
+    Serial.println(message);
+}
 
 void setup() {
     Serial.begin(9600);
-    Serial.println("Starting System Integration Test...");
+    logInfo(F("Starting System Integration Test..."));
+    testStartTime = millis();
     
-    // Тест 1: Ініціалізація всіх компонентів
-    Serial.println("Test 1 - Component Initialization:");
+    // Ініціалізація компонентів
+    logInfo(F("Initializing components..."));
     
-    if (!sensor.begin()) {
-        Serial.println("FAIL - Sensor init failed");
-        return;
-    }
-    Serial.println("Sensor: PASS");
+    // Ініціалізація датчика
+    dht.begin();
+    logSuccess(F("Sensor initialized"));
     
+    // Ініціалізація дисплея
     if (!display.begin()) {
-        Serial.println("FAIL - Display init failed");
+        logError(F("Failed to initialize display!"));
         return;
     }
-    Serial.println("Display: PASS");
+    logSuccess(F("Display initialized"));
     
-    if (!transfer.begin()) {
-        Serial.println("FAIL - Radio init failed");
+    // Ініціалізація менеджера часу
+    if (!timeManager.begin()) {
+        logError(F("Failed to initialize time manager!"));
         return;
     }
-    Serial.println("Radio: PASS");
+    logSuccess(F("Time manager initialized"));
     
-    powerManager.setup();
-    Serial.println("Power Manager: PASS");
+    // Ініціалізація радіо
+    if (!radio.begin()) {
+        logError(F("Failed to initialize radio!"));
+        return;
+    }
+    logSuccess(F("Radio initialized"));
+    
+    // Ініціалізація менеджера живлення
+    if (!powerManager.begin()) {
+        logError(F("Failed to initialize power manager!"));
+        return;
+    }
+    logSuccess(F("Power manager initialized"));
+    
+    // Тест вимірювання температури
+    logInfo(F("Testing temperature measurement..."));
+    float temp = dht.readTemperature();
+    if (isnan(temp)) {
+        logError(F("Failed to read temperature!"));
+        return;
+    }
+    logSuccess(F("Temperature reading successful"));
+    Serial.print(F("Temperature: "));
+    Serial.print(temp);
+    Serial.println(F("°C"));
+    
+    // Тест оновлення дисплея
+    logInfo(F("Testing display update..."));
+    if (!display.updateDisplay(temp, 22.0, true, 60.0, 0, 30)) {
+        logError(F("Failed to update display!"));
+        return;
+    }
+    logSuccess(F("Display updated successfully"));
+    
+    // Тест передачі даних
+    logInfo(F("Testing data transmission..."));
+    Data data;
+    data.temperature = temp;
+    data.humidity = dht.readHumidity();
+    data.timestamp = timeManager.getCurrentTime();
+    data.relayState = true;
+    
+    if (!radio.sendData(data)) {
+        logError(F("Failed to send data!"));
+        return;
+    }
+    logSuccess(F("Data sent successfully"));
+    
+    // Тест режиму сну
+    logInfo(F("Testing sleep mode..."));
+    if (!powerManager.enterSleepMode(5)) {
+        logError(F("Failed to enter sleep mode!"));
+        return;
+    }
+    logSuccess(F("Sleep mode test successful"));
+    
+    // Тест перевірки часу
+    logInfo(F("Testing time check..."));
+    if (!timeManager.isTimeToCheck()) {
+        logError(F("Time check failed!"));
+        return;
+    }
+    logSuccess(F("Time check successful"));
+    
+    // Тест рівня батареї
+    logInfo(F("Testing battery level..."));
+    float batteryLevel = powerManager.getBatteryLevel();
+    if (batteryLevel < 0.0 || batteryLevel > 100.0) {
+        logError(F("Invalid battery level!"));
+        return;
+    }
+    logSuccess(F("Battery level check successful"));
+    Serial.print(F("Battery Level: "));
+    Serial.print(batteryLevel);
+    Serial.println(F("%"));
+    
+    // Вимірювання тривалості тесту
+    testDuration = millis() - testStartTime;
+    logInfo(F("Test duration: ") + String(testDuration) + F("ms"));
+    
+    logInfo(F("Test completed"));
+    logInfo(F("Result: ") + String(testPassed ? F("PASSED") : F("FAILED")));
+    if (!testPassed) {
+        logInfo(F("Error: ") + errorMessage);
+    }
 }
 
 void loop() {
-    // Тест 2: Повний цикл роботи
-    static unsigned long lastCheck = 0;
-    if (millis() - lastCheck >= 5000) {
-        Serial.println("\nRunning full system cycle test:");
-        
-        // Зчитування температури
-        float temp = sensor.getCurrentTemperature();
-        Serial.print("Temperature reading: ");
-        Serial.println(temp);
-        
-        // Відображення на дисплеї
-        display.showTemperature(temp);
-        Serial.println("Display update: OK");
-        
-        // Передача даних
-        if (transfer.sendData(temp, 22.0)) {
-            Serial.println("Data transmission: OK");
-        } else {
-            Serial.println("Data transmission: FAIL");
-        }
-        
-        // Режим сну
-        Serial.println("Entering sleep mode...");
-        powerManager.enterSleepMode();
-        Serial.println("Woke up from sleep mode");
-        
-        lastCheck = millis();
+    // Тест завершено
+    while(1) {
+        digitalWrite(LED_BUILTIN, testPassed);
+        delay(1000);
+        digitalWrite(LED_BUILTIN, !testPassed);
+        delay(1000);
     }
 } 

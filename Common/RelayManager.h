@@ -1,5 +1,6 @@
 #ifndef RELAY_MANAGER_H
 #define RELAY_MANAGER_H
+
 #include <Arduino.h>
 
 class RelayManager {
@@ -15,4 +16,4 @@ private:
     bool state;
 };
 
-#endif
+#endif 

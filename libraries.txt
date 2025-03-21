@@ -78,4 +78,11 @@ void setup() {
   if (!rtc.begin()) {
     Serial.println("RTC failed!");
   }
-} 
+}
+
+hd44780
+iarduino_RTC
+DHT
+OneWire
+DallasTemperature
+CircularBuffer 

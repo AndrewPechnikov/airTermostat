@@ -1,26 +1,36 @@
 #include "TimeManager.h"
+#include "Config.h"
 
-void TimeManager::setup() {
-    if (!rtc.begin()) {
-        Serial.println(F("Помилка ініціалізації RTC!"));
-        return;
-    }
-    settings = eeprom.loadSettings();
+TimeManager::TimeManager() : 
+    lastCheckTime(0),
+    targetTemperature(DEFAULT_TARGET_TEMP)
+{
 }
 
-float TimeManager::getTargetTemperature() {
-    return isNightTime() ? settings.nightTemp : settings.defaultTemp;
+void TimeManager::begin() {
+    lastCheckTime = millis();
 }
 
-bool TimeManager::isNightTime() {
-    DateTime now = rtc.now();
-    uint8_t currentHour = now.hour();
-    
-    if (settings.nightStartHour < settings.nightEndHour) {
-        return currentHour >= settings.nightStartHour && 
-               currentHour < settings.nightEndHour;
-    } else {
-        return currentHour >= settings.nightStartHour || 
-               currentHour < settings.nightEndHour;
-    }
+unsigned long TimeManager::getCurrentTime() {
+    return millis();
+}
+
+void TimeManager::setTargetTemperature(float temp) {
+    targetTemperature = temp;
+}
+
+float TimeManager::getTargetTemperature() const {
+    return targetTemperature;
+}
+
+bool TimeManager::isTimeToCheck() {
+    return (millis() - lastCheckTime >= WAKEUP_INTERVAL);
+}
+
+void TimeManager::resetCheckTimer() {
+    lastCheckTime = millis();
 } 
+
+unsigned long TimeManager::getLastCheckTime() {
+    return lastCheckTime ;
+}

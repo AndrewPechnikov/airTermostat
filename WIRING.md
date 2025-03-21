@@ -2,59 +2,78 @@
 
 ## Передавач (Transmitter)
 
+### Датчик температури (вибір одного)
+#### DHT22
+| DHT22 | Arduino Nano |
+|-------|--------------|
+| VCC   | 5V          |
+| DATA  | PIN_DHT     |
+| GND   | GND         |
+
+**Примітка**: Додайте підтягуючий резистор 10кОм між VCC та DATA
+
+#### DS18B20
+| DS18B20 | Arduino Nano |
+|---------|--------------|
+| VCC     | 5V          |
+| GND     | GND         |
+| DATA    | PIN_DHT     |
+
+**Примітка**: Додайте підтягуючий резистор 4.7кОм між VCC та DATA
+
+#### Термістор
+| Термістор | Arduino Nano |
+|-----------|--------------|
+| VCC       | 5V          |
+| GND       | GND         |
+| A0        | PIN_DHT     |
+
+**Примітка**: Додайте послідовний резистор 10кОм між A0 та 5V
+
 ### nRF24L01+ Радіомодуль
 | nRF24L01 | Arduino Nano |
 |----------|--------------|
 | VCC      | 3.3V        |
 | GND      | GND         |
-| CE       | D9          |
-| CSN      | D10         |
-| SCK      | D13         |
-| MOSI     | D11         |
-| MISO     | D12         |
-| IRQ      | D2          |
+| CE       | PIN_CE      |
+| CSN      | PIN_CSN     |
+| SCK      | PIN_SCK     |
+| MOSI     | PIN_MOSI    |
+| MISO     | PIN_MISO    |
+| IRQ      | PIN_IRQ     |
 
 **Важливо**: Додайте конденсатор 100мкФ між VCC та GND радіомодуля
-
-### DHT22 Датчик температури
-| DHT22 | Arduino Nano |
-|-------|--------------|
-| VCC   | 5V          |
-| DATA  | D2          |
-| GND   | GND         |
-
-**Примітка**: Додайте підтягуючий резистор 4.7кОм між VCC та DATA
 
 ### LCD 1602 I2C
 | LCD I2C | Arduino Nano |
 |---------|--------------|
 | VCC     | 5V          |
 | GND     | GND         |
-| SDA     | A4          |
-| SCL     | A5          |
+| SDA     | PIN_SDA     |
+| SCL     | PIN_SCL     |
 
 ### DS3231 RTC Модуль
 | DS3231 | Arduino Nano |
 |--------|--------------|
 | VCC    | 5V          |
 | GND    | GND         |
-| SDA    | A4          |
-| SCL    | A5          |
+| SDA    | PIN_SDA     |
+| SCL    | PIN_SCL     |
 
 ### Кнопки керування
 | Кнопка | Arduino Nano |
 |--------|--------------|
-| UP     | D3 -> GND   |
-| DOWN   | D4 -> GND   |
-| SET    | D5 -> GND   |
+| UP     | PIN_BTN_UP  |
+| DOWN   | PIN_BTN_DOWN|
+| MODE   | PIN_BTN_MODE|
 
 **Примітка**: Для кожної кнопки додайте підтягуючий резистор 10кОм до VCC
 
 ### Індикація
 | Компонент | Arduino Nano |
 |-----------|--------------|
-| LED Power | D6          |
-| Buzzer    | D8          |
+| LED Power | PIN_LED_POWER|
+| Buzzer    | PIN_BUZZER   |
 
 ## Приймач (Receiver)
 
@@ -63,11 +82,11 @@
 |----------|--------------|
 | VCC      | 3.3V        |
 | GND      | GND         |
-| CE       | D9          |
-| CSN      | D10         |
-| SCK      | D13         |
-| MOSI     | D11         |
-| MISO     | D12         |
+| CE       | PIN_CE      |
+| CSN      | PIN_CSN     |
+| SCK      | PIN_SCK     |
+| MOSI     | PIN_MOSI    |
+| MISO     | PIN_MISO    |
 | IRQ      | не підключено |
 
 ### Реле
@@ -75,16 +94,16 @@
 |------|--------------|
 | VCC  | 5V          |
 | GND  | GND         |
-| IN   | D7          |
+| IN   | PIN_RELAY   |
 
 **Важливо**: Додайте захисний діод 1N4007 паралельно котушці реле
 
 ### Індикація
 | Компонент | Arduino Nano |
 |-----------|--------------|
-| LED Status| D6          |
-| LED Relay | D5          |
-| Buzzer    | D8          |
+| LED Status| PIN_LED_STATUS|
+| LED Relay | PIN_LED_RELAY |
+| Buzzer    | PIN_BUZZER    |
 
 ## Додаткові компоненти
 

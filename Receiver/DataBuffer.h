@@ -1,7 +1,7 @@
 #ifndef DATA_BUFFER_H
 #define DATA_BUFFER_H
 
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 
 struct TempData {
     float temp;

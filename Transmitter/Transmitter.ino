@@ -1,69 +1,88 @@
-// Transmitter.ino
-// #include <SPI.h>
-// #include <nRF24L01.h>
-// #include <RF24.h>
-#include "SensorManager.h"
+#include <SPI.h>
+#include <DHT.h>
+#include "Config.h"
 #include "DisplayManager.h"
-#include "ClockManager.h"
-#include "RFCommon.h"
-#include "Transfer.h"
-#include "PowerManager.h"
 #include "TimeManager.h"
-#include "NotificationManager.h"
-#include "EEPROMManager.h"
+#include "RadioManager.h"
+#include "PowerManager.h"
 
-// #define CE_PIN 9
-// #define CSN_PIN 10
+// Ініціалізація об'єктів
+DHT dht(PIN_DHT, DHT_TYPE);
+DisplayManager display;
+TimeManager time;
+RadioManager radio;
+PowerManager& power = PowerManager::getInstance();
 
-// RF24 radio(CE_PIN, CSN_PIN);
-SensorManager sensor(A0);
-DisplayManager display(6, 7, 8, 9, 10, 11);
-ClockManager clock;
-Transfer postman;
-
-PowerManager powerManager;
-TimeManager timeManager;
-NotificationManager notificationManager;
-EEPROMManager eepromManager;
-
-float setPoint = 22.0;
+// Глобальні змінні
+float currentTemp = 0;
 bool relayState = false;
+unsigned long lastDisplayUpdate = 0;
 
 void setup() {
     Serial.begin(9600);
-    sensor.begin();
-    display.begin();
-    clock.begin();
-    postman.begin();
-    powerManager.setup();
-    timeManager.setup();
-    notificationManager.setup();
     
-    // Завантаження налаштувань
-    Settings settings = eepromManager.loadSettings();
-    Serial.println("Transmitter ready");
+    // Ініціалізація об'єктів
+    dht.begin();
+    display.begin();
+    time.begin();
+    radio.begin();
+    power.begin();
+    
+    Serial.println(F("Transmitter ready"));
 }
 
 void loop() {
-    static unsigned long lastUpdate = 0;
+    // Перевірка температури та керування реле
+    if (time.isTimeToCheck()) {
+        float temp = dht.readTemperature();
+        if (!isnan(temp)) {
+            currentTemp = temp;
+            
+            // Логіка керування реле
+            if (temp > time.getTargetTemperature() + TEMP_HYSTERESIS) {
+                relayState = false;
+            } else if (temp < time.getTargetTemperature() - TEMP_HYSTERESIS) {
+                relayState = true;
+            }
+            
+            // Відправка даних
+            Data data;
+            data.temperature = temp;
+            data.humidity = dht.readHumidity();
+            data.timestamp = time.getCurrentTime();
+            data.relayState = relayState;
+            
+            if (radio.sendData(data)) {
+                Serial.print(F("Sent: Temp="));
+                Serial.print(temp);
+                Serial.print(F("C, Relay="));
+                Serial.println(relayState ? "ON" : "OFF");
+            }
+        }
+        
+        time.resetCheckTimer();
+    }
     
-    if (millis() - lastUpdate >= UPDATE_INTERVAL) {
-        float currentTemp = sensor.getCurrentTemperature();
-        float targetTemp = timeManager.getTargetTemperature();
-        
-        if (abs(currentTemp - targetTemp) > MAX_TEMP_DIFFERENCE) {
-            notificationManager.notify(TEMP_TOO_HIGH);
-        }
-        
-        // Використовуємо IRQ для передачі
-        if (!postman.sendData(currentTemp, targetTemp)) {
-            notificationManager.notify(CONNECTION_LOST);
-        }
-        
-        lastUpdate = millis();
-        powerManager.enterSleepMode();
-    } else {
-        // Легкий сон між оновленнями
-        powerManager.enterLightSleep();
+    // Оновлення дисплея
+    if (time.getCurrentTime() - lastDisplayUpdate >= DISPLAY_UPDATE_INTERVAL) {
+        display.updateDisplay(
+            currentTemp,
+            time.getTargetTemperature(),
+            relayState,
+            dht.readHumidity(),
+            time.getCurrentTime(),
+            WAKEUP_INTERVAL - (time.getCurrentTime() - time.getLastCheckTime())
+        );
+        lastDisplayUpdate = time.getCurrentTime();
+    }
+    
+    // Режим сну
+    if (power.isTimeToSleep()) {
+        display.noDisplay();
+        radio.powerDown();
+        power.enterSleep();
+        radio.powerUp();
+        display.display();
+        power.wakeUp();
     }
 }

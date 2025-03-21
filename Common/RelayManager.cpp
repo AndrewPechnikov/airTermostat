@@ -1,6 +1,5 @@
 #include "RelayManager.h"
 
-// Конструктор зі списком ініціалізації
 RelayManager::RelayManager(uint8_t pin) : relayPin(pin), state(false) {
 }
 
@@ -21,4 +20,4 @@ void RelayManager::turnOff() {
 
 bool RelayManager::isOn() const {
     return state;
-}
+} 

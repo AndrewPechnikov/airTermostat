@@ -1,19 +1,27 @@
 #ifndef DISPLAY_MANAGER_H
 #define DISPLAY_MANAGER_H
 
-#include <Wire.h>
-#include <LCD03.h> // Include the I2C LCD library
+#include <LiquidCrystal.h>
+#include "Config.h"
 
 class DisplayManager {
-private:
-    LCD03 lcd;  // I2C LCD object
-
 public:
-    DisplayManager(int lcdAddr);  // Constructor with I2C address as argument
-    void begin();                 // Initialize the display
-    void showTemperature(float temperature);   // Display temperature
-    void showRelayState(bool state);           // Display relay state (ON/OFF)
-    void showError(const char* message);      // Display error message
+    DisplayManager();
+    void begin();
+    void updateDisplay(float currentTemp, float targetTemp, bool relayState, float humidity, 
+                      unsigned long time, unsigned long nextCheck);
+    void showError(const char* message);
+    void showConfig(float targetTemp);
+    void noDisplay() { lcd.noDisplay(); }
+    void display() { lcd.display(); }
+    
+private:
+    LiquidCrystal lcd;
+    int currentPage;
+    void showPage0(float currentTemp, float targetTemp);
+    void showPage1(bool relayState, float humidity);
+    void showPage2(unsigned long time, unsigned long nextCheck);
+    void showPage3();
 };
 
-#endif
+#endif 
