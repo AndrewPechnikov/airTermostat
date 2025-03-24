@@ -6,17 +6,17 @@
 // =============================================
 
 // Вимкнення/вмикання компонентів
-#define ENABLE_RELAY         1   // Реле для керування нагрівачем
-#define ENABLE_RTC           1   // Модуль реального часу DS3231
-#define ENABLE_NRF24         1   // Радіомодуль nRF24L01
-#define ENABLE_DHT22         1   // Датчик температури DHT22
-#define ENABLE_LCD           1   // LCD дисплей
-#define ENABLE_LED           1   // Світлодіод для індикації
-#define ENABLE_BUTTONS       1   // Кнопки керування
-#define ENABLE_EEPROM        1   // Збереження налаштувань в EEPROM
-#define ENABLE_DIAGNOSTICS   1   // Система діагностики
-#define ENABLE_POWER_MANAGER 1   // Менеджер живлення
-#define ENABLE_NOTIFICATIONS 1   // Система сповіщень
+#define ENABLE_RELAY         0   // Реле для керування нагрівачем
+#define ENABLE_RTC           0   // Модуль реального часу DS3231
+#define ENABLE_NRF24         0   // Радіомодуль nRF24L01
+#define ENABLE_DHT22         0   // Датчик температури DHT22
+#define ENABLE_LCD           0   // LCD дисплей
+#define ENABLE_LED           0   // Світлодіод для індикації
+#define ENABLE_BUTTONS       0   // Кнопки керування
+#define ENABLE_EEPROM        0   // Збереження налаштувань в EEPROM
+#define ENABLE_DIAGNOSTICS   0   // Система діагностики
+#define ENABLE_POWER_MANAGER 0   // Менеджер живлення
+#define ENABLE_NOTIFICATIONS 0   // Система сповіщень
 
 // =============================================
 // Піни для компонентів

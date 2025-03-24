@@ -1,18 +1,21 @@
 #include "RadioManager.h"
 
-RadioManager::RadioManager() : 
-    radio(PIN_CE, PIN_CSN)
-{
+RadioManager::RadioManager() {
+#if ENABLE_NRF24
+    radio = RF24(PIN_CE, PIN_CSN);
+#endif
 }
 
 void RadioManager::begin() {
+
     if (!radio.begin()) {
         Serial.println(F("RF24 failed!"));
-        while(1);
     }
-    radio.setChannel(RF_CHANNEL);
-    radio.setPALevel(RF_PA_LEVEL);
+    radio.setChannel(RADIO_CHANNEL);
+    radio.setPALevel(RADIO_PA_LEVEL);
+    radio.setDataRate(RADIO_DATA_RATE);
     radio.openWritingPipe(0xF0F0F0F0E1LL);
+
 }
 
 bool RadioManager::sendData(const Data& data) {
@@ -20,7 +23,9 @@ bool RadioManager::sendData(const Data& data) {
 }
 
 void RadioManager::powerDown() {
+
     radio.powerDown();
+
 }
 
 void RadioManager::powerUp() {

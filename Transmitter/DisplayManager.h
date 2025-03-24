@@ -8,20 +8,20 @@ class DisplayManager {
 public:
     DisplayManager();
     void begin();
-    void updateDisplay(float currentTemp, float targetTemp, bool relayState, float humidity, 
-                      unsigned long time, unsigned long nextCheck);
+    void updateDisplay(float currentTemp, float targetTemp, bool relayState, float humidity, unsigned long time, unsigned long timeToNextCheck);
     void showError(const char* message);
-    void showConfig(float targetTemp);
-    void noDisplay() { lcd.noDisplay(); }
-    void display() { lcd.display(); }
+    void showConfig();
+    void noDisplay();
+    void display();
     
 private:
-    LiquidCrystal lcd;
-    int currentPage;
-    void showPage0(float currentTemp, float targetTemp);
-    void showPage1(bool relayState, float humidity);
-    void showPage2(unsigned long time, unsigned long nextCheck);
+    void showPage0(float currentTemp, float targetTemp, bool relayState);
+    void showPage1(float humidity, unsigned long time);
+    void showPage2(unsigned long timeToNextCheck);
     void showPage3();
+    
+    LiquidCrystal lcd;
+    uint8_t currentPage;
 };
 
 #endif 

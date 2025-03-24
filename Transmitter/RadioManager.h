@@ -1,8 +1,10 @@
 #ifndef RADIO_MANAGER_H
 #define RADIO_MANAGER_H
 
-#include <RF24.h>
 #include "Config.h"
+
+#include <RF24.h>
+
 
 struct Data {
     float temperature;
@@ -19,9 +21,10 @@ public:
     void powerDown();
     void powerUp();
     
-    
 private:
+
     RF24 radio;
+
 };
 
 #endif 
