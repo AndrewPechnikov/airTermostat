@@ -5,16 +5,14 @@
 
 class RelayManager {
 public:
-    RelayManager(uint8_t pin1, uint8_t pin2); // pin1 - реле on, pin2 - реле off
+    RelayManager(); // Конструктор
     void begin();
     void turnOn();
     void turnOff();
-    bool isOn() const;
-    
+    bool isOn(); // Повертає стан реле
+
 private:
-    uint8_t relayPin1;
-    uint8_t relayPin2;
-    bool state;
+    bool state; // Внутрішній стан (включено/вимкнено)
 };
 
-#endif 
+#endif

@@ -56,9 +56,13 @@
 // =============================================
 
 // Радіо
-#define RADIO_CHANNEL        76  // Канал радіо
-#define RADIO_PA_LEVEL       RF24_PA_MAX  // Потужність передачі
-#define RADIO_DATA_RATE      RF24_250KBPS // Швидкість передачі
+
+#define TIME_BETWEEN_ATTEMPT_TRANSFER 0
+#define NUM_ATTEMPT_TRANSFER 15
+#define SIZE_PACK            32
+#define RADIO_CHANNEL        0x60  // Канал радіо
+#define RADIO_PA_LEVEL       RF24_PA_MIN // Потужність передачі
+#define RADIO_DATA_RATE      RF24_1MBPS // Швидкість передачі
 
 // Температура
 #define TEMP_HYSTERESIS      1.0  // Гістерезис температури

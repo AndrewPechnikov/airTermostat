@@ -1,10 +1,9 @@
 #include "RelayManager.h"
 
-RelayManager::RelayManager() :  state(false) {
-}
+RelayManager::RelayManager() : state(false) {}
 
 void RelayManager::begin() {
-    
+    // Тут можеш додати ініціалізацію пінів, якщо потрібно
 }
 
 void RelayManager::turnOn() {
@@ -15,6 +14,6 @@ void RelayManager::turnOff() {
     state = false;
 }
 
-bool RelayManager::isOn() const {
+bool RelayManager::isOn() {
     return state;
-} 
+}

@@ -1,13 +1,13 @@
-#ifndef RADIOMANAGER_H
-#define RADIOMANAGER_H
+#ifndef NRFRELAY_H
+#define NRFRELAY_H
 
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 
-class RadioManager {
+class NRFRelay {
 public:
-    RadioManager(uint8_t cePin, uint8_t csnPin, uint64_t txAddress);
+    NRFRelay(uint8_t cePin, uint8_t csnPin, uint64_t txAddress);
     void begin();
     bool sendRelayCommand(bool state, bool &confirmation);
 
